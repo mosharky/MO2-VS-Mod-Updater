@@ -4,6 +4,28 @@ Update vintage story mods installed through Mod Organizer 2 using [Vintage Story
 
 ## How to contribute
 
-- Develop with Python 3.8, probably using venv
-    - This project is set up to use a venv in the root folder
-- See: https://www.modorganizer.org/python-plugins-doc/setup-tools.html
+### Prerequisites
+- Python 3.12 or newer
+
+### First-Time Setup
+1. Open a terminal in the project directory.
+2. Create a virtual environment:
+   ```
+   python3 -m venv .venv
+   ```
+   or
+   ```
+   C:Path/To/Python3.13/python.exe -m venv .venv
+   ```
+3. Activate the virtual environment:
+   ```
+   On Windows:
+   .\.venv\Scripts\activate
+
+   On Linux:
+   source .venv/bin/activate
+   ```
+4. Install required packages:
+   ```
+   pip install -r requirements.txt
+   ```

@@ -1,0 +1,4 @@
+mobase-stubs==2.5.*
+pyqt6-stubs @ git+https://github.com/python-qt-tools/PyQt6-stubs
+black
+flake8-black
