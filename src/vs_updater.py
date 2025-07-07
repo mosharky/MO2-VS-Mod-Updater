@@ -15,11 +15,11 @@ from pathlib import Path
 class PluginWindow(QtWidgets.QDialog):
     def __init__(self, organizer: mobase.IOrganizer, parent=None):
         self.organizer = organizer
+        self.current_vs_version = "1.20.12"
         self.sample_label = QtWidgets.QLabel("Test")
-        # Keys are mod ids, value is an object of each mods' JSON
-        self.mods_data = {}
-        # Base vintage story Mod DB API url
-        self.base_url = "https://mods.vintagestory.at/api"
+        self.base_url = "https://mods.vintagestory.at/api"  # Base vintage story Mod DB API url
+        self.mods_data = {}  # Keys are mod ids, value is an object of each mods' JSON
+        self.mod_to_update = []
         
         super(PluginWindow, self).__init__(parent)
 
@@ -32,7 +32,10 @@ class PluginWindow(QtWidgets.QDialog):
 
         someButton = QtWidgets.QPushButton("Test", self)
         someButton.clicked.connect(self.test_btn)
+        check_updates_btn = QtWidgets.QPushButton("Check for updates", self)
+        check_updates_btn.clicked.connect(self.check_updates)
         leftVerticalLayout.addWidget(someButton)
+        leftVerticalLayout.addWidget(check_updates_btn)
 
         rightVerticalLayout.addWidget(self.sample_label)
 
@@ -43,9 +46,33 @@ class PluginWindow(QtWidgets.QDialog):
 
     def test_btn(self):
         logging.debug("LATEST VERSION: " + str(self.get_latest_game_version()))
+        
+    def check_updates(self):
+        self.populate_mods_data()
+        
+    def check_mod_for_updates(self, mod_id: str):
+        mod_db_info = self.get_mod_info_from_api(mod_id)
+        current_mod_version = self.mods_data[mod_id]["version"]
+        # Getting latest mod release that supports current VS version
+        latest_mod_version = ""
+        latest_mod_release = {}
+        for release in mod_db_info["mod"]["releases"]:
+            if self.current_vs_version in release["tags"]:
+                latest_mod_version = release["modversion"]
+                latest_mod_release = release
+                break
+        
+        # If current = latest, there is no update
+        if current_mod_version == latest_mod_version: return
+        
+        # Generating changelog between current release and latest release
+        for release in mod_db_info["mod"]["releases"]:
+            valid_release = self.current_vs_version in release["tags"]
+            
+        
 
-    # Adds mod info from installed mods' modinfo.json file
-    def populate_mod_data(self):
+    def populate_mods_data(self):
+        """ Populates mods_data for each mod in MO2 from their modinfo.json file. """
         mods_path = Path(self.organizer.modsPath())
 
         # Looking through each mod folder
@@ -61,6 +88,7 @@ class PluginWindow(QtWidgets.QDialog):
                         break
         
     def get_latest_game_version(self):
+        """ Returns the latest game version from the ModDB API. """
         try:
             with urllib.request.urlopen(f"{self.base_url}/gameversions") as response:
                 if response.status == 200:
@@ -74,6 +102,7 @@ class PluginWindow(QtWidgets.QDialog):
             raise
         
     def get_mod_info_from_zip(self, zip_path: Path) -> dict:
+        """ Returns modinfo.json from mod zip as a dictionary. """
         mod_info = {}
         try:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
@@ -97,18 +126,19 @@ class PluginWindow(QtWidgets.QDialog):
             
         return mod_info
         
-    def get_mod_info_from_api(self, mod_id: str):
+    def get_mod_info_from_api(self, mod_id: str) -> dict:
+        """ Returns all data from ModDB page """
+        data = {}
         try:
             with urllib.request.urlopen(f"{self.base_url}/mod/{mod_id}") as response:
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
-                    return data
                 else:
                     qCritical(f"Error: HTTP {response.status}")
-                    return None
         except Exception as ex:
             qCritical(f"Error fetching mod info: {ex}")
             raise
+        return data
         
 
 
