@@ -29,3 +29,7 @@ Update vintage story mods installed through Mod Organizer 2 using [Vintage Story
    ```
    pip install -r requirements.txt
    ```
+
+## Credits
+[VS Mod Updater](https://github.com/Laerinok/VS_ModsUpdater_v2) by Laerinok for references on how to install and update mods
+[MO2 Plugins](https://github.com/deorder/mo2-plugins) by deorder for references on how to initialize an MO2 plugin project and workspace

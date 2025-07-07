@@ -1,5 +1,3 @@
 {
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
     "python.defaultInterpreterPath": ".venv\\Scripts\\python.exe"
 }
