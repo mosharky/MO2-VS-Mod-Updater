@@ -39,9 +39,12 @@ class PluginWindow(QtWidgets.QDialog):
         test_btn.clicked.connect(self.test_btn)
         check_updates_btn = QtWidgets.QPushButton("Check for Updates", self)
         check_updates_btn.clicked.connect(self.check_for_updates)
+        update_mods_btn = QtWidgets.QPushButton("Update Mods", self)
+        update_mods_btn.clicked.connect(self.update_mods)
 
         left_vertical_layout.addWidget(test_btn)
         left_vertical_layout.addWidget(check_updates_btn)
+        left_vertical_layout.addWidget(update_mods_btn)
 
         # Right layout
         right_vertical_layout = QtWidgets.QVBoxLayout()
@@ -57,6 +60,35 @@ class PluginWindow(QtWidgets.QDialog):
 
     def test_btn(self):
         logging.info("CURRENT VERSION: " + self.current_vs_version)
+
+    def update_mods(self):
+        """Downloads all updates for mods in MO2."""
+        if not self.mod_updates:
+            qWarning("No mod updates found. Please check for updates first.")
+            return
+
+        for update in self.mod_updates:
+            mod_id = update["mod_id"]
+            latest_release = update["latest_release"]
+            filename = latest_release["filename"]
+            download_url = latest_release["mainfile"]
+
+            try:
+                # Delete old mod zip file if it exists
+                old_zip_path = self.mods_data[mod_id]["path"]
+                logging.debug(f"Deleting old mod zip: {old_zip_path}")
+                old_zip_path.unlink()
+
+                # Download the mod zip file
+                response = urllib.request.urlopen(download_url)
+                # Output in old_zip_path.parent
+                logging.debug(f"Downloading {filename} from {download_url}")
+                zip_path = old_zip_path.parent / filename
+                with open(zip_path, "wb") as out_file:
+                    out_file.write(response.read())
+                logging.info(f"Downloaded {filename} to {zip_path}")
+            except Exception as ex:
+                qCritical(f"Error downloading {filename}: {ex}")
 
     def check_for_updates(self):
         """Checks for updates for all mods in MO2."""
@@ -178,8 +210,11 @@ class PluginWindow(QtWidgets.QDialog):
                         # Use fix_json_string to ensure the JSON is valid
                         json_str = json_file.read().decode("utf-8")
                         json_str = fix_json_string(json_str)
+
                         mod_info = json.loads(json_str)
                         mod_info = {k.lower(): v for k, v in mod_info.items()}
+                        mod_info["path"] = zip_path
+
                         json_file.close()
                 else:
                     qCritical(f"Warning: modinfo.json not found in {zip_path.name}")
