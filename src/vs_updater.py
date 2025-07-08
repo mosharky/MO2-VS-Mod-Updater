@@ -68,14 +68,43 @@ class PluginWindow(QtWidgets.QDialog):
         self.setLayout(main_layout)
         self.tree.setColumnWidth(0, 500)
 
-    # TODO: Add a dialogue to confirm updates
     # TODO: Add a dialogue informing when updates were successfully downloaded and how many mods were updated
     def update_mods(self):
         """Downloads all updates for mods in MO2 that are checked."""
+        # Check if there are any available updates
         if not self.mod_updates:
             QtWidgets.QMessageBox.critical(
                 self, "Error", "No mod updates found. Please check for updates first."
             )
+            return
+
+        # Count how many mods are selected for update
+        selected_count = 0
+        for row in range(self.model.rowCount()):
+            update_item = self.model.item(row, 0)
+            if (
+                update_item is not None
+                and update_item.checkState() == Qt.CheckState.Checked
+            ):
+                selected_count += 1
+
+        if selected_count == 0:
+            QtWidgets.QMessageBox.information(
+                self, "No Selection", "No mods are selected for update."
+            )
+            return
+
+        # Show confirmation dialog
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Confirm Updates",
+            f"Are you sure you want to update {selected_count} mod(s)?\n\n"
+            "This will download new versions and replace the existing mod files.",
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.Yes
+        )
+
+        if reply != QtWidgets.QMessageBox.StandardButton.Yes:
             return
 
         # Iterate backwards to avoid skipping rows when removing
