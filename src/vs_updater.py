@@ -16,6 +16,7 @@ from pathlib import Path
 
 # TODO: Add an update checker for the plugin itself
 
+
 class PluginWindow(QtWidgets.QDialog):
     def __init__(self, organizer: mobase.IOrganizer, parent=None):
         self.organizer = organizer
@@ -200,37 +201,54 @@ class PluginWindow(QtWidgets.QDialog):
 
         logging.debug(str(self.mod_updates))
 
-    #TODO: Improve update checking with more leniency
     def check_mod_for_update(self, mod_id: str):
         mod_db_info = self.get_mod_info_from_api(mod_id)
         current_mod_version = self.mods_data[mod_id]["version"]
+        current_mod_version_parsed = parse_version(current_mod_version)
+        # Dummy variables
+        latest_mod_version = None
+        latest_mod_release = None
         # Getting latest mod release that supports current VS version
-        latest_mod_version = "0.0.0"
-        latest_mod_release = {}
         for release in mod_db_info["mod"]["releases"]:
-            if self.current_vs_version in release["tags"]:
+            release_version = release["modversion"]
+            release_version_parsed = parse_version(release_version)
+            latest_supported_vs_version = parse_version(release["tags"][-1])
+            current_vs_version_parsed = parse_version(self.current_vs_version)
+            # An update is found if the release version is greater than the current mod version
+            # and the current VS version is supported by the release
+            # or if the current VS version's minor version matches the latest supported VS version's minor version
+            if release_version_parsed > current_mod_version and (
+                self.current_vs_version in release["tags"]
+                or (
+                    len(current_vs_version_parsed) >= 2
+                    and len(latest_supported_vs_version) >= 2
+                    and current_vs_version_parsed[1] == latest_supported_vs_version[1]
+                )
+            ):
                 latest_mod_version = release["modversion"]
                 latest_mod_release = release
                 break
-            elif parse_version(current_mod_version) >= parse_version(release["modversion"]):
+            # No update found
+            elif current_mod_version_parsed >= release_version_parsed:
                 return
 
-        # If current = latest, there is no need to update
-        if parse_version(current_mod_version) >= parse_version(latest_mod_version):
+        # If no update was found
+        # and if 'current_mod_version_parsed >= release_version_parsed' was never reached
+        if latest_mod_version is None or latest_mod_release is None:
             return
-        else:
-            self.mod_updates.append(
-                {
-                    "mod_id": mod_id,
-                    "name": mod_db_info["mod"]["name"],
-                    "current_version": current_mod_version,
-                    "latest_version": latest_mod_version,
-                    "latest_release": latest_mod_release,
-                    "changelog": self.generate_changelog(
-                        mod_db_info, parse_version(current_mod_version)
-                    ),
-                }
-            )
+
+        self.mod_updates.append(
+            {
+                "mod_id": mod_id,
+                "name": mod_db_info["mod"]["name"],
+                "current_version": current_mod_version,
+                "latest_version": latest_mod_version,
+                "latest_release": latest_mod_release,
+                "changelog": self.generate_changelog(
+                    mod_db_info, current_mod_version_parsed
+                ),
+            }
+        )
 
     def generate_changelog(
         self, mod_db_info: dict, current_mod_version: tuple
