@@ -503,7 +503,7 @@ class VSUpdaterPlugin(mobase.IPluginTool):
         return "VS Mod Updater"
 
     def author(self):
-        return "mo_shark"
+        return "mosharky"
 
     def description(self):
         return "Update mods in MO2's virtual file system"
