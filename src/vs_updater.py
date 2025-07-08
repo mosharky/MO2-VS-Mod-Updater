@@ -389,10 +389,49 @@ class PluginWindow(QtWidgets.QDialog):
 
 
 class RichTextDelegate(QtWidgets.QStyledItemDelegate):
+    def is_dark_theme(self, option):
+        """Detect if the current theme is dark by checking background color brightness."""
+        bg_color = option.palette.color(QtGui.QPalette.ColorRole.Base)
+        # Calculate luminance using the standard formula
+        luminance = (0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()) / 255
+        return luminance < 0.5
+    
+    def adjust_text_for_theme(self, text, is_dark):
+        """Adjust text colors based on theme."""
+        if is_dark:
+            # Dark theme: use light colors
+            text = text.replace('color: black', 'color: #ffffff')
+            text = text.replace('color: #000000', 'color: #ffffff')
+            text = text.replace('color: #000', 'color: #fff')
+            # If no color is specified, add default light color
+            if 'color:' not in text.lower() and not text.startswith('<div'):
+                text = f'<span style="color: #ffffff;">{text}</span>'
+            elif text.startswith('<div') and 'color:' not in text.lower():
+                text = text.replace('<div', '<div style="color: #ffffff;"')
+            elif text.startswith('<i>') and 'color:' not in text.lower():
+                text = f'<span style="color: #cccccc;">{text}</span>'
+        else:
+            # Light theme: use dark colors (default)
+            text = text.replace('color: white', 'color: #000000')
+            text = text.replace('color: #ffffff', 'color: #000000')
+            text = text.replace('color: #fff', 'color: #000')
+            # If no color is specified, add default dark color
+            if 'color:' not in text.lower() and not text.startswith('<div'):
+                text = f'<span style="color: #000000;">{text}</span>'
+            elif text.startswith('<div') and 'color:' not in text.lower():
+                text = text.replace('<div', '<div style="color: #000000;"')
+            elif text.startswith('<i>') and 'color:' not in text.lower():
+                text = f'<span style="color: #666666;">{text}</span>'
+        
+        return text
+
     def paint(self, painter, option, index):
         # Only use rich text for child items (depth > 0)
         if index.parent().isValid():
             text = index.data()
+            is_dark = self.is_dark_theme(option)
+            text = self.adjust_text_for_theme(text, is_dark)
+            
             doc = QtGui.QTextDocument()
             doc.setHtml(text)
             painter.save()
@@ -408,6 +447,9 @@ class RichTextDelegate(QtWidgets.QStyledItemDelegate):
     def sizeHint(self, option, index):
         if index.parent().isValid():
             text = index.data()
+            is_dark = self.is_dark_theme(option)
+            text = self.adjust_text_for_theme(text, is_dark)
+            
             doc = QtGui.QTextDocument()
             doc.setHtml(text)
             doc.setTextWidth(option.rect.width())
