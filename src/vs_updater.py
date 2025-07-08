@@ -33,7 +33,9 @@ class PluginWindow(QtWidgets.QDialog):
 
         self.setFixedSize(640, 480)
 
-        # TODO: Set window icon
+        # Set window icon
+        icon_path = Path(__file__).parent / "icons" / "logo.ico"
+        self.setWindowIcon(QtGui.QIcon(str(icon_path)))
 
         # Left layout
         left_vertical_layout = QtWidgets.QVBoxLayout()
@@ -497,8 +499,9 @@ class VSUpdaterPlugin(mobase.IPluginTool):
         return self.name()
 
     def icon(self):
-        # TODO: Set icon
-        return QtGui.QIcon("test")
+        # Get the path to the icon file relative to this plugin file
+        icon_path = Path(__file__).parent / "icons" / "logo.ico"
+        return QtGui.QIcon(str(icon_path))
 
     def tooltip(self):
         return self.description()
