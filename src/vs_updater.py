@@ -39,13 +39,13 @@ class PluginWindow(QtWidgets.QDialog):
 
         # Left layout
         left_vertical_layout = QtWidgets.QVBoxLayout()
-        check_updates_btn = QtWidgets.QPushButton("Check for Updates", self)
+        check_updates_btn = QtWidgets.QPushButton("🔄 Check for Updates", self)
         check_updates_btn.clicked.connect(self.check_for_updates)
         left_vertical_layout.addWidget(check_updates_btn)
 
         # Right layout
         right_vertical_layout = QtWidgets.QVBoxLayout()
-        update_mods_btn = QtWidgets.QPushButton("Update Mods", self)
+        update_mods_btn = QtWidgets.QPushButton("Update Mods ⬇️", self)
         update_mods_btn.clicked.connect(self.update_mods)
         right_vertical_layout.addWidget(update_mods_btn)
 
