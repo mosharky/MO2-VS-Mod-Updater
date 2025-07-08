@@ -219,7 +219,7 @@ class PluginWindow(QtWidgets.QDialog):
             # An update is found if the release version is greater than the current mod version
             # and the current VS version is supported by the release
             # or if the current VS version's minor version matches the latest supported VS version's minor version
-            if release_version_parsed > current_mod_version and (
+            if release_version_parsed > current_mod_version_parsed and (
                 self.current_vs_version in release["tags"]
                 or (
                     len(current_vs_version_parsed) >= 2
