@@ -10,11 +10,9 @@ import mobase  # type: ignore
 import PyQt6.QtGui as QtGui  # type: ignore
 import PyQt6.QtWidgets as QtWidgets  # type: ignore
 
-from PyQt6.QtCore import Qt, qCritical, qWarning, qDebug, qInfo, QSize  # type: ignore
+from PyQt6.QtCore import Qt, QSize  # type: ignore
 from typing import List
 from pathlib import Path
-
-# TODO: Add an update checker for the plugin itself
 
 
 class PluginWindow(QtWidgets.QDialog):
@@ -60,15 +58,18 @@ class PluginWindow(QtWidgets.QDialog):
         self.model.setHorizontalHeaderLabels(["Name", "Version"])
         self.tree.header().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
 
+        # Enable rich text rendering in the tree view (only applies to child items)
         self.tree.setItemDelegateForColumn(0, RichTextDelegate(self.tree))
         self.tree.setItemDelegateForColumn(1, RichTextDelegate(self.tree))
-        self.tree.setWordWrap(True)  # Enable word wrap for long text
+        self.tree.setWordWrap(True)
 
         main_layout.addWidget(self.tree)
         self.tree.setModel(self.model)
         self.setLayout(main_layout)
         self.tree.setColumnWidth(0, 500)
 
+    # TODO: Add a dialogue to confirm updates
+    # TODO: Add a dialogue informing when updates were successfully downloaded and how many mods were updated
     def update_mods(self):
         """Downloads all updates for mods in MO2 that are checked."""
         if not self.mod_updates:
@@ -112,7 +113,7 @@ class PluginWindow(QtWidgets.QDialog):
                     logging.debug(f"Deleting old mod zip: {old_zip_path}")
                     old_zip_path.unlink()
                 except Exception as ex:
-                    qCritical(f"Error downloading {filename}: {ex}")
+                    logging.critical(f"Error downloading {filename}: {ex}")
 
     def check_for_updates(self):
         """Checks for updates for all mods in MO2."""
@@ -143,7 +144,7 @@ class PluginWindow(QtWidgets.QDialog):
             try:
                 self.check_mod_for_update(mod_id)
             except Exception as ex:
-                qCritical(f"Error checking mod {mod_id}: {ex}")
+                logging.critical(f"Error checking mod {mod_id}: {ex}")
 
         # Run checks in parallel using ThreadPoolExecutor
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -156,7 +157,7 @@ class PluginWindow(QtWidgets.QDialog):
                 self, "No Updates", "All mods are up to date :)"
             )
         else:
-            qInfo(f"Found {len(self.mod_updates)} mod updates.")
+            logging.info(f"Found {len(self.mod_updates)} mod updates.")
 
         # Sort mod updates by name
         self.mod_updates.sort(key=lambda x: x["name"])
@@ -166,6 +167,7 @@ class PluginWindow(QtWidgets.QDialog):
         self.model.setHorizontalHeaderLabels(["Name", "Version"])
 
         for update in self.mod_updates:
+            # Create item to display the update
             update_item = QtGui.QStandardItem(update["name"])
             update_item.setEditable(False)
             update_item.setCheckable(True)
@@ -205,7 +207,7 @@ class PluginWindow(QtWidgets.QDialog):
         mod_db_info = self.get_mod_info_from_api(mod_id)
         current_mod_version = self.mods_data[mod_id]["version"]
         current_mod_version_parsed = parse_version(current_mod_version)
-        # Dummy variables
+
         latest_mod_version = None
         latest_mod_release = None
         # Getting latest mod release that supports current VS version
@@ -297,12 +299,13 @@ class PluginWindow(QtWidgets.QDialog):
             with urllib.request.urlopen(f"{self.base_url}/gameversions") as response:
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
+                    # ASSUMPTION: The last entry in the list is always the latest version
                     return data["gameversions"][-1]["name"]
                 else:
-                    qCritical(f"Error: HTTP {response.status}")
+                    logging.critical(f"Error: HTTP {response.status}")
                     return None
         except Exception as ex:
-            qCritical(f"Error fetching game versions: {ex}")
+            logging.critical(f"Error fetching latest game versions: {ex}")
             raise
 
     def get_mod_info_from_zip(self, zip_path: Path) -> dict:
@@ -324,18 +327,20 @@ class PluginWindow(QtWidgets.QDialog):
 
                         json_file.close()
                 else:
-                    qCritical(f"Warning: modinfo.json not found in {zip_path.name}")
+                    logging.critical(
+                        f"Warning: modinfo.json not found in {zip_path.name}"
+                    )
 
                 zip_ref.close()
 
         except zipfile.BadZipFile:
-            qCritical(f"Error: {zip_path.name} is not a valid zip file")
+            logging.critical(f"Error: {zip_path.name} is not a valid zip file")
         except json.JSONDecodeError:
-            qCritical(
+            logging.critical(
                 f"Error: Invalid JSON in modinfo.json from {zip_path.name}; could not update the mod. Report this to the mod author."
             )
         except Exception as ex:
-            qCritical(f"Error processing {zip_path.name}: {ex}")
+            logging.critical(f"Error processing {zip_path.name}: {ex}")
 
         return mod_info
 
@@ -347,9 +352,9 @@ class PluginWindow(QtWidgets.QDialog):
                 if response.status == 200:
                     data = json.loads(response.read().decode("utf-8"))
                 else:
-                    qCritical(f"Error: HTTP {response.status}")
+                    logging.critical(f"Error: HTTP {response.status}")
         except Exception as ex:
-            qCritical(f"Error fetching mod info: {ex}")
+            logging.critical(f"Error fetching mod info: {ex}")
             raise
         return data
 
