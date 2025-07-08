@@ -70,7 +70,6 @@ class PluginWindow(QtWidgets.QDialog):
         self.setLayout(main_layout)
         self.tree.setColumnWidth(0, 500)
 
-    # TODO: Add a dialogue informing when updates were successfully downloaded and how many mods were updated
     def update_mods(self):
         """Downloads all updates for mods in MO2 that are checked."""
         # Check if there are any available updates
@@ -109,6 +108,10 @@ class PluginWindow(QtWidgets.QDialog):
         if reply != QtWidgets.QMessageBox.StandardButton.Yes:
             return
 
+        # Track successful updates
+        successful_updates = 0
+        failed_updates = []
+
         # Iterate backwards to avoid skipping rows when removing
         for row in reversed(range(self.model.rowCount())):
             update_item = self.model.item(row, 0)
@@ -126,6 +129,7 @@ class PluginWindow(QtWidgets.QDialog):
                 latest_release = update_data["latest_release"]
                 filename = latest_release["filename"]
                 download_url = latest_release["mainfile"]
+                mod_name = update_data["name"]
 
                 try:
                     old_zip_path = self.mods_data[mod_id]["path"]
@@ -143,8 +147,30 @@ class PluginWindow(QtWidgets.QDialog):
                     # Delete old mod zip file if it exists
                     logging.debug(f"Deleting old mod zip: {old_zip_path}")
                     old_zip_path.unlink()
+                    successful_updates += 1
                 except Exception as ex:
                     logging.critical(f"Error downloading {filename}: {ex}")
+                    failed_updates.append(mod_name)
+
+        # Show completion dialog
+        if successful_updates > 0 or failed_updates:
+            if failed_updates:
+                # Some updates failed
+                failed_list = "\n".join(f"• {mod}" for mod in failed_updates)
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "Updated Mods with Errors",
+                    f"Successfully updated {successful_updates} mod(s).\n\n"
+                    f"Failed to update {len(failed_updates)} mod(s):\n{failed_list}\n\n"
+                    "Check the logs for more details about the failed updates."
+                )
+            else:
+                # All updates successful
+                QtWidgets.QMessageBox.information(
+                    self,
+                    "Updated Mods Successfully",
+                    f"Successfully updated {successful_updates} mod(s)!\n\n"
+                )
 
     def check_for_updates(self):
         """Checks for updates for all mods in MO2."""
