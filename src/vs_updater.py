@@ -10,10 +10,11 @@ import mobase  # type: ignore
 import PyQt6.QtGui as QtGui  # type: ignore
 import PyQt6.QtWidgets as QtWidgets  # type: ignore
 
-from PyQt6.QtCore import Qt, qCritical, qWarning, qDebug, qInfo  # type: ignore
-from typing import List, Optional, Dict, Any
+from PyQt6.QtCore import Qt, qCritical, qWarning, qDebug, qInfo, QSize  # type: ignore
+from typing import List
 from pathlib import Path
 
+# TODO: Add an update checker for the plugin itself
 
 class PluginWindow(QtWidgets.QDialog):
     def __init__(self, organizer: mobase.IOrganizer, parent=None):
@@ -21,80 +22,117 @@ class PluginWindow(QtWidgets.QDialog):
         self.current_vs_version = normalize_version(
             self.organizer.managedGame().gameVersion()
         )
-        self.sample_label = QtWidgets.QLabel("Test")
         # Base vintage story Mod DB API url
         self.base_url = "https://mods.vintagestory.at/api"
         # Keys are mod ids, value is an object of each mods' JSON
         self.mods_data = {}
         self.mod_updates = []
+        self.model = QtGui.QStandardItemModel()
+        self.tree = QtWidgets.QTreeView()
 
         super(PluginWindow, self).__init__(parent)
 
+        self.setFixedSize(640, 480)
+
         # TODO: Set window icon
-        self.resize(500, 500)
 
         # Left layout
         left_vertical_layout = QtWidgets.QVBoxLayout()
-        test_btn = QtWidgets.QPushButton("Test", self)
-        test_btn.clicked.connect(self.test_btn)
         check_updates_btn = QtWidgets.QPushButton("Check for Updates", self)
         check_updates_btn.clicked.connect(self.check_for_updates)
-        update_mods_btn = QtWidgets.QPushButton("Update Mods", self)
-        update_mods_btn.clicked.connect(self.update_mods)
-
-        left_vertical_layout.addWidget(test_btn)
         left_vertical_layout.addWidget(check_updates_btn)
-        left_vertical_layout.addWidget(update_mods_btn)
 
         # Right layout
         right_vertical_layout = QtWidgets.QVBoxLayout()
+        update_mods_btn = QtWidgets.QPushButton("Update Mods", self)
+        update_mods_btn.clicked.connect(self.update_mods)
+        right_vertical_layout.addWidget(update_mods_btn)
 
-        right_vertical_layout.addWidget(self.sample_label)
+        # Buttons layout
+        buttons_layout = QtWidgets.QHBoxLayout()
+        buttons_layout.addLayout(left_vertical_layout)
+        buttons_layout.addLayout(right_vertical_layout)
 
-        # Main layout
-        main_layout = QtWidgets.QHBoxLayout()
-        main_layout.addLayout(left_vertical_layout)
-        main_layout.addLayout(right_vertical_layout)
+        # Main Layout
+        main_layout = QtWidgets.QVBoxLayout()
+        main_layout.addLayout(buttons_layout)
+        self.model.setHorizontalHeaderLabels(["Name", "Version"])
+        self.tree.header().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Fixed)
 
+        self.tree.setItemDelegateForColumn(0, RichTextDelegate(self.tree))
+        self.tree.setItemDelegateForColumn(1, RichTextDelegate(self.tree))
+        self.tree.setWordWrap(True)  # Enable word wrap for long text
+
+        main_layout.addWidget(self.tree)
+        self.tree.setModel(self.model)
         self.setLayout(main_layout)
-
-    def test_btn(self):
-        logging.info("CURRENT VERSION: " + self.current_vs_version)
+        self.tree.setColumnWidth(0, 500)
 
     def update_mods(self):
-        """Downloads all updates for mods in MO2."""
+        """Downloads all updates for mods in MO2 that are checked."""
         if not self.mod_updates:
-            qWarning("No mod updates found. Please check for updates first.")
+            QtWidgets.QMessageBox.critical(
+                self, "Error", "No mod updates found. Please check for updates first."
+            )
             return
 
-        for update in self.mod_updates:
-            mod_id = update["mod_id"]
-            latest_release = update["latest_release"]
-            filename = latest_release["filename"]
-            download_url = latest_release["mainfile"]
+        # Iterate backwards to avoid skipping rows when removing
+        for row in reversed(range(self.model.rowCount())):
+            update_item = self.model.item(row, 0)
+            if (
+                update_item is not None
+                and update_item.checkState() == Qt.CheckState.Checked
+            ):
+                mod_id = update_item.data(Qt.ItemDataRole.UserRole)
+                # Find the corresponding update dict by mod_id
+                update_data = next(
+                    (u for u in self.mod_updates if u["mod_id"] == mod_id), None
+                )
+                if not update_data:
+                    continue
+                latest_release = update_data["latest_release"]
+                filename = latest_release["filename"]
+                download_url = latest_release["mainfile"]
 
-            try:
-                # Delete old mod zip file if it exists
-                old_zip_path = self.mods_data[mod_id]["path"]
-                logging.debug(f"Deleting old mod zip: {old_zip_path}")
-                old_zip_path.unlink()
+                try:
+                    old_zip_path = self.mods_data[mod_id]["path"]
 
-                # Download the mod zip file
-                response = urllib.request.urlopen(download_url)
-                # Output in old_zip_path.parent
-                logging.debug(f"Downloading {filename} from {download_url}")
-                zip_path = old_zip_path.parent / filename
-                with open(zip_path, "wb") as out_file:
-                    out_file.write(response.read())
-                logging.info(f"Downloaded {filename} to {zip_path}")
-            except Exception as ex:
-                qCritical(f"Error downloading {filename}: {ex}")
+                    # Download the mod zip file
+                    response = urllib.request.urlopen(download_url)
+                    # Output in old_zip_path.parent
+                    logging.debug(f"Downloading {filename} from {download_url}")
+                    zip_path = old_zip_path.parent / filename
+                    with open(zip_path, "wb") as out_file:
+                        out_file.write(response.read())
+                    logging.info(f"Downloaded {filename} to {zip_path}")
+                    # Remove update_item from model
+                    self.model.removeRow(row)
+                    # Delete old mod zip file if it exists
+                    logging.debug(f"Deleting old mod zip: {old_zip_path}")
+                    old_zip_path.unlink()
+                except Exception as ex:
+                    qCritical(f"Error downloading {filename}: {ex}")
 
     def check_for_updates(self):
         """Checks for updates for all mods in MO2."""
+        # Show loading overlay until updates are checked
+        loading_label = QtWidgets.QLabel("Checking for updates...", self)
+        loading_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        loading_label.setStyleSheet(
+            "background: rgba(255,255,255,150); font-size: 18px; padding: 40px; border: 2px solid #888;"
+        )
+        loading_label.setGeometry(self.rect())
+        loading_label.show()
+        QtWidgets.QApplication.processEvents()  # Force update
+
         self.populate_mods_data()
         if not self.mods_data:
-            qWarning("No mods found in MO2. Please add some mods first.")
+            loading_label.hide()
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Mods Found",
+                "No mods found in MO2. Please add some mods first.",
+            )
             return
 
         # Clear previous updates
@@ -110,27 +148,75 @@ class PluginWindow(QtWidgets.QDialog):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             list(executor.map(safe_check, self.mods_data.keys()))
 
+        loading_label.hide()
+
         if not self.mod_updates:
-            qInfo("All mods are up to date.")
+            QtWidgets.QMessageBox.information(
+                self, "No Updates", "All mods are up to date :)"
+            )
         else:
             qInfo(f"Found {len(self.mod_updates)} mod updates.")
 
-        logging.info(str(self.mod_updates))
+        # Sort mod updates by name
+        self.mod_updates.sort(key=lambda x: x["name"])
 
+        # Clear the model and populate it with mod updates
+        self.model.clear()
+        self.model.setHorizontalHeaderLabels(["Name", "Version"])
+
+        for update in self.mod_updates:
+            update_item = QtGui.QStandardItem(update["name"])
+            update_item.setEditable(False)
+            update_item.setCheckable(True)
+            update_item.setCheckState(Qt.CheckState.Checked)
+            update_item.setData(update["mod_id"], Qt.ItemDataRole.UserRole)
+
+            version_item = QtGui.QStandardItem(
+                f"{update['current_version']} → {update['latest_version']}"
+            )
+            version_item.setEditable(False)
+
+            # Add change log for each release since the current version
+            for changes in update["changelog"]:
+                for version, changelog_text in changes.items():
+                    # Create a rich text item for the changelog
+                    changelog_item = QtGui.QStandardItem()
+                    if changelog_text == "":
+                        changelog_item.setText("<i>No changelog found.</i>")
+                    else:
+                        changelog_item.setText(changelog_text)
+
+                    changelog_item.setEditable(False)
+                    changelog_version_item = QtGui.QStandardItem(
+                        f"<div style='text-align:center;'><i>{version}</i></div>"
+                    )
+                    changelog_version_item.setEditable(False)
+                    changelog_version_item.setSelectable(False)
+                    update_item.appendRow([changelog_item, changelog_version_item])
+
+            self.model.appendRow([update_item, version_item])
+
+        self.tree.setColumnWidth(0, 500)
+
+        logging.debug(str(self.mod_updates))
+
+    #TODO: Improve update checking with more leniency
     def check_mod_for_update(self, mod_id: str):
         mod_db_info = self.get_mod_info_from_api(mod_id)
-        current_mod_version = parse_version(self.mods_data[mod_id]["version"])
+        current_mod_version = self.mods_data[mod_id]["version"]
         # Getting latest mod release that supports current VS version
-        latest_mod_version = parse_version("0.0.0")
+        latest_mod_version = "0.0.0"
         latest_mod_release = {}
         for release in mod_db_info["mod"]["releases"]:
             if self.current_vs_version in release["tags"]:
-                latest_mod_version = parse_version(release["modversion"])
+                latest_mod_version = release["modversion"]
                 latest_mod_release = release
                 break
+            elif parse_version(current_mod_version) >= parse_version(release["modversion"]):
+                return
 
         # If current = latest, there is no need to update
-        if current_mod_version >= latest_mod_version:
+        if parse_version(current_mod_version) >= parse_version(latest_mod_version):
             return
         else:
             self.mod_updates.append(
@@ -141,14 +227,20 @@ class PluginWindow(QtWidgets.QDialog):
                     "latest_version": latest_mod_version,
                     "latest_release": latest_mod_release,
                     "changelog": self.generate_changelog(
-                        mod_db_info, current_mod_version
+                        mod_db_info, parse_version(current_mod_version)
                     ),
                 }
             )
 
-    def generate_changelog(self, mod_db_info: dict, current_mod_version: tuple) -> str:
-        """Generates a changelog between the current and latest release."""
-        changelog = ""
+    def generate_changelog(
+        self, mod_db_info: dict, current_mod_version: tuple
+    ) -> list[dict]:
+        """
+        Generates a changelog between the current and latest release.
+
+        The changelog is a list of dictionaries where keys are version numbers and values are the changelog text.
+        """
+        changelog = []
         for release in mod_db_info["mod"]["releases"]:
             release_version = parse_version(release["modversion"])
             valid_release = (
@@ -156,10 +248,7 @@ class PluginWindow(QtWidgets.QDialog):
                 and release_version > current_mod_version
             )
             if valid_release:
-                release_changelog = (
-                    f"{release["modversion"]}\n{release["changelog"]}\n\n"
-                )
-                changelog += release_changelog
+                changelog.append({release["modversion"]: release["changelog"]})
             # Assuming releases list is always descending from latest
             elif release_version == current_mod_version:
                 break
@@ -245,6 +334,34 @@ class PluginWindow(QtWidgets.QDialog):
             qCritical(f"Error fetching mod info: {ex}")
             raise
         return data
+
+
+class RichTextDelegate(QtWidgets.QStyledItemDelegate):
+    def paint(self, painter, option, index):
+        # Only use rich text for child items (depth > 0)
+        if index.parent().isValid():
+            text = index.data()
+            doc = QtGui.QTextDocument()
+            doc.setHtml(text)
+            painter.save()
+            painter.translate(option.rect.topLeft())
+            doc.setTextWidth(option.rect.width())
+            ctx = QtGui.QAbstractTextDocumentLayout.PaintContext()
+            doc.documentLayout().draw(painter, ctx)
+            painter.restore()
+        else:
+            # Use default painting for top-level items (shows checkbox)
+            super().paint(painter, option, index)
+
+    def sizeHint(self, option, index):
+        if index.parent().isValid():
+            text = index.data()
+            doc = QtGui.QTextDocument()
+            doc.setHtml(text)
+            doc.setTextWidth(option.rect.width())
+            return QSize(int(doc.idealWidth()), int(doc.size().height()))
+        else:
+            return super().sizeHint(option, index)
 
 
 class VSUpdaterPlugin(mobase.IPluginTool):
