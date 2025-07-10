@@ -4,7 +4,7 @@
     "Description": "Update Vintage Story mods installed through Mod Organizer 2, all with a convenient UI!",
     "DocsUrl": "https://github.com/mosharky/MO2-VS-Mod-Updater/blob/main/README.md",
     "GithubUrl": "https://github.com/mosharky/MO2-VS-Mod-Updater",
-    "NexusUrl": "",
+    "NexusUrl": "https://mods.vintagestory.at/modupdaterformodorganizer",
     "Versions": [
         {
             "Version": "1.0.0",
