@@ -1,12 +1,11 @@
-<center>
-<h1> Vintage Story Mod Updater for MO2 </h1>
 
-<p><i>Update Vintage Story mods installed through Mod Organizer 2, all with a convenient UI!</i></p>
+<center><h1> Vintage Story Mod Updater for MO2 </h1></center>
 
-<img alt="Discord" src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da&link=https%3A%2F%2Fdiscord.gg%2FsWVexFEWNZ">
-<img alt="GitHub Profile" src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github&link=https%3A%2F%2Fgithub.com%2Fmosharky">
+<center><p><i>Update Vintage Story mods installed through Mod Organizer 2, all with a convenient UI!</i></p></center>
 
-</center>
+<center><img alt="Discord" src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da&link=https%3A%2F%2Fdiscord.gg%2FsWVexFEWNZ"> <img alt="GitHub Profile" src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github&link=https%3A%2F%2Fgithub.com%2Fmosharky"></center>
+
+
 
 
 ## Requirements
