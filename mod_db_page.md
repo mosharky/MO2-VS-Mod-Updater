@@ -3,8 +3,9 @@
 
 <p><i>Update Vintage Story mods installed through Mod Organizer 2, all with a convenient UI!</i></p>
 
-<img alt="Discord" src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da&link=https%3A%2F%2Fdiscord.gg%2FsWVexFEWNZ">
-<img alt="GitHub Profile" src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github&link=https%3A%2F%2Fgithub.com%2Fmosharky">
+<a href="https://mods.vintagestory.at/modupdaterformo"><img src="https://img.shields.io/badge/%E2%9A%99%EF%B8%8F-VS%20Mod%20DB-%23a6947b?style=flat&labelColor=%237d6b56" alt="VS Mod DB"></a>
+<a href="https://discord.gg/sWVexFEWNZ"><img src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da" alt="Discord"></a>
+<a href="https://github.com/mosharky"><img src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github" alt="GitHub"></a>
 
 </center>
 
@@ -26,7 +27,7 @@ Currently unsure of compatibility with platforms other than Windows since Mod Or
 <h3>Manual</h3>
 <ol>
     <li>Set up <a href="https://mods.vintagestory.at/vsmosupportplugin">Mod Organizer 2 Support Tools</a> if you haven't already (see their page for instructions)</li>
-    <li>Download the latest version from <a href="https://mods.vintagestory.at/">VS Mod DB</a> or <a href="https://github.com/mosharky/MO2-VS-Mod-Updater/releases">GitHub Releases</a></li>
+    <li>Download the latest version from <a href="https://mods.vintagestory.at/modupdaterformo#tab-files">VS Mod DB</a> or <a href="https://github.com/mosharky/MO2-VS-Mod-Updater/releases">GitHub Releases</a></li>
     <li>Extract the <code>vs_mod_updater</code> folder from the downloaded .zip file into the plugins folder, found in your MO2 install directory
         <ul>
             <li>The plugins folder will be in the same directory as <code>ModOrganizer.exe</code>. For example, assuming MO2 is installed in <code>C:\MO2</code>, your plugins folder is <code>C:\MO2\plugins\</code></li>
