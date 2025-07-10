@@ -1,6 +1,5 @@
 from .utils import *
 
-import re
 import zipfile
 import json
 import urllib.request
@@ -101,8 +100,9 @@ class PluginWindow(QtWidgets.QDialog):
             "Confirm Updates",
             f"Are you sure you want to update {selected_count} mod(s)?\n\n"
             "This will download new versions and replace the existing mod files.",
-            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
             QtWidgets.QMessageBox.StandardButton.Yes
+            | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.Yes,
         )
 
         if reply != QtWidgets.QMessageBox.StandardButton.Yes:
@@ -162,14 +162,14 @@ class PluginWindow(QtWidgets.QDialog):
                     "Updated Mods with Errors",
                     f"Successfully updated {successful_updates} mod(s).\n\n"
                     f"Failed to update {len(failed_updates)} mod(s):\n{failed_list}\n\n"
-                    "Check the logs for more details about the failed updates."
+                    "Check the logs for more details about the failed updates.",
                 )
             else:
                 # All updates successful
                 QtWidgets.QMessageBox.information(
                     self,
                     "Updated Mods Successfully",
-                    f"Successfully updated {successful_updates} mod(s)!\n\n"
+                    f"Successfully updated {successful_updates} mod(s)!\n\n",
                 )
 
     def check_for_updates(self):
@@ -421,36 +421,38 @@ class RichTextDelegate(QtWidgets.QStyledItemDelegate):
         """Detect if the current theme is dark by checking background color brightness."""
         bg_color = option.palette.color(QtGui.QPalette.ColorRole.Base)
         # Calculate luminance using the standard formula
-        luminance = (0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()) / 255
+        luminance = (
+            0.299 * bg_color.red() + 0.587 * bg_color.green() + 0.114 * bg_color.blue()
+        ) / 255
         return luminance < 0.5
-    
+
     def adjust_text_for_theme(self, text, is_dark):
         """Adjust text colors based on theme."""
         if is_dark:
             # Dark theme: use light colors
-            text = text.replace('color: black', 'color: #ffffff')
-            text = text.replace('color: #000000', 'color: #ffffff')
-            text = text.replace('color: #000', 'color: #fff')
+            text = text.replace("color: black", "color: #ffffff")
+            text = text.replace("color: #000000", "color: #ffffff")
+            text = text.replace("color: #000", "color: #fff")
             # If no color is specified, add default light color
-            if 'color:' not in text.lower() and not text.startswith('<div'):
+            if "color:" not in text.lower() and not text.startswith("<div"):
                 text = f'<span style="color: #ffffff;">{text}</span>'
-            elif text.startswith('<div') and 'color:' not in text.lower():
-                text = text.replace('<div', '<div style="color: #ffffff;"')
-            elif text.startswith('<i>') and 'color:' not in text.lower():
+            elif text.startswith("<div") and "color:" not in text.lower():
+                text = text.replace("<div", '<div style="color: #ffffff;"')
+            elif text.startswith("<i>") and "color:" not in text.lower():
                 text = f'<span style="color: #cccccc;">{text}</span>'
         else:
             # Light theme: use dark colors (default)
-            text = text.replace('color: white', 'color: #000000')
-            text = text.replace('color: #ffffff', 'color: #000000')
-            text = text.replace('color: #fff', 'color: #000')
+            text = text.replace("color: white", "color: #000000")
+            text = text.replace("color: #ffffff", "color: #000000")
+            text = text.replace("color: #fff", "color: #000")
             # If no color is specified, add default dark color
-            if 'color:' not in text.lower() and not text.startswith('<div'):
+            if "color:" not in text.lower() and not text.startswith("<div"):
                 text = f'<span style="color: #000000;">{text}</span>'
-            elif text.startswith('<div') and 'color:' not in text.lower():
-                text = text.replace('<div', '<div style="color: #000000;"')
-            elif text.startswith('<i>') and 'color:' not in text.lower():
+            elif text.startswith("<div") and "color:" not in text.lower():
+                text = text.replace("<div", '<div style="color: #000000;"')
+            elif text.startswith("<i>") and "color:" not in text.lower():
                 text = f'<span style="color: #666666;">{text}</span>'
-        
+
         return text
 
     def paint(self, painter, option, index):
@@ -459,7 +461,7 @@ class RichTextDelegate(QtWidgets.QStyledItemDelegate):
             text = index.data()
             is_dark = self.is_dark_theme(option)
             text = self.adjust_text_for_theme(text, is_dark)
-            
+
             doc = QtGui.QTextDocument()
             doc.setHtml(text)
             painter.save()
@@ -477,7 +479,7 @@ class RichTextDelegate(QtWidgets.QStyledItemDelegate):
             text = index.data()
             is_dark = self.is_dark_theme(option)
             text = self.adjust_text_for_theme(text, is_dark)
-            
+
             doc = QtGui.QTextDocument()
             doc.setHtml(text)
             doc.setTextWidth(option.rect.width())
@@ -486,14 +488,14 @@ class RichTextDelegate(QtWidgets.QStyledItemDelegate):
             return super().sizeHint(option, index)
 
 
-class VSUpdaterPlugin(mobase.IPluginTool):
+class VSModUpdaterPlugin(mobase.IPluginTool):
 
     def __init__(self):
         self.__window = None
         # self.organizer = None
         self.__parentWidget = None
 
-        super(VSUpdaterPlugin, self).__init__()
+        super(VSModUpdaterPlugin, self).__init__()
 
     def init(self, organizer: mobase.IOrganizer) -> bool:
         self.organizer = organizer

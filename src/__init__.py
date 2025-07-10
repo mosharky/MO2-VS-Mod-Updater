@@ -1,5 +1,5 @@
-from .vs_updater import VSUpdaterPlugin
+from .vs_mod_updater import VSModUpdaterPlugin
 import mobase  # type: ignore
 
 def createPlugin() -> mobase.IPlugin:
-    return VSUpdaterPlugin()
+    return VSModUpdaterPlugin()
