@@ -1,13 +1,12 @@
 <center>
-<h1> Vintage Story Mod Updater for MO2 </h1>
+
+# Vintage Story Mod Updater for MO2
 
 *Update Vintage Story mods installed through Mod Organizer 2, all with a convenient UI!*
 
-<!-- Future Mod DB link: https://mods.vintagestory.at/modupdaterformo2 -->
-<img alt="Static Badge" src="https://img.shields.io/badge/%E2%9A%99%EF%B8%8F-VS%20Mod%20DB-%23a6947b?style=flat&labelColor=%237d6b56&link=https%3A%2F%2Fmods.vintagestory.at%2Fmodupdaterformo2">
-<img alt="Discord" src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da&link=https%3A%2F%2Fdiscord.gg%2FsWVexFEWNZ">
-<img alt="Static Badge" src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github&link=https%3A%2F%2Fgithub.com%2Fmosharky">
-
+![](https://img.shields.io/badge/%E2%9A%99%EF%B8%8F-VS%20Mod%20DB-%23a6947b?style=flat&labelColor=%237d6b56&link=https%3A%2F%2Fmods.vintagestory.at%2Fmodupdaterformo)
+![](https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da&link=https%3A%2F%2Fdiscord.gg%2FsWVexFEWNZ)
+![](https://img.shields.io/badge/GitHub-gray?style=flat&logo=github&link=https%3A%2F%2Fgithub.com%2Fmosharky)
 
 
 </center>
@@ -41,13 +40,13 @@ You can use [Kezyma's Plugin Finder](https://kezyma.github.io/?p=pluginfinder) t
 
 ## Usage
 To open the update menu, go to the Tools button and select 'VS Mod Updater'
-![](https://github.com/mosharky/MO2-VS-Mod-Updater/blob/main/assets/plugin_dropdown.png)
+![](https://raw.githubusercontent.com/mosharky/MO2-VS-Mod-Updater/refs/heads/main/assets/plugin_dropdown.png)
 
 From there, you'll be met with this screen:
-![](https://github.com/mosharky/MO2-VS-Mod-Updater/blob/main/assets/plugin_ui.png)
+![](https://raw.githubusercontent.com/mosharky/MO2-VS-Mod-Updater/refs/heads/main/assets/plugin_ui.png)
 
 You need to press the 'Check for Updates' button to be able to update any mods. If the plugin successfully found updates, you'll see a neat overview of all updates and their changes:
-![](https://github.com/mosharky/MO2-VS-Mod-Updater/blob/main/assets/updates_found.png)
+![](https://raw.githubusercontent.com/mosharky/MO2-VS-Mod-Updater/refs/heads/main/assets/updates_found.png)
 
 The 'Update Mods' button will only update mods with their checkbox marked.
 
