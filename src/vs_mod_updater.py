@@ -345,9 +345,11 @@ class PluginWindow(QtWidgets.QDialog):
                     if file.suffix.lower() == ".zip":
                         mod_info = self.get_mod_info_from_zip(file)
 
-                        # If not empty
-                        if mod_info:
+                        # Ensure mod_info is a dict and contains 'modid'
+                        if isinstance(mod_info, dict) and "modid" in mod_info:
                             self.mods_data[mod_info["modid"]] = mod_info
+                        else:
+                            logging.warning(f"modinfo.json in {file} missing 'modid' key or is invalid. Skipping.")
                         break
 
     def get_latest_game_version(self):
