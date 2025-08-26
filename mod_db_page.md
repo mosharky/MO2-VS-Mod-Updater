@@ -37,14 +37,6 @@ Currently unsure of compatibility with platforms other than Windows since Mod Or
 
 <p>If you followed the instructions correctly, you should have a <code>C:\MO2\plugins\vs_mod_updater\</code> folder with a bunch of <code>.py</code> files.</p>
 
-<h3>Plugin Finder</h3>
-<blockquote>
-<strong>WARNING:</strong><br>
-This plugin has not been approved yet for Kezyma's Plugin Finder. Once it is, I will remove this warning.
-</blockquote>
-
-<p>You can use <a href="https://kezyma.github.io/?p=pluginfinder">Kezyma's Plugin Finder</a> to install many plugins, including this one, as well as update them.</p>
-
 
 <h2>Usage</h2>
 <p>To open the update menu, go to the Tools button and select 'VS Mod Updater'</p>
@@ -59,12 +51,8 @@ This plugin has not been approved yet for Kezyma's Plugin Finder. Once it is, I 
 <p>The 'Update Mods' button will only update mods with their checkbox marked.</p>
 
 <h3>Updating</h3>
-<blockquote>
-<strong>WARNING:</strong><br>
-This plugin has not been approved yet for Kezyma's Plugin Finder. Once it is, I will remove this warning.
-</blockquote>
 
-<p>You can use <a href="https://kezyma.github.io/?p=pluginfinder">Kezyma's Plugin Finder</a> to install new updates. Otherwise, reinstall the plugin for every update.</p>
+<p>Reinstall the plugin for every update. In the future, I might see if I can update everything within MO2.</p>
 
 
 <h2>How it works</h2>
