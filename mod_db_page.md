@@ -5,7 +5,7 @@
 
 <a href="https://mods.vintagestory.at/modupdaterformodorganizer"><img src="https://img.shields.io/badge/%E2%9A%99%EF%B8%8F-VS%20Mod%20DB-%23a6947b?style=flat&labelColor=%237d6b56" alt="VS Mod DB"></a>
 <a href="https://discord.gg/sWVexFEWNZ"><img src="https://img.shields.io/discord/532779726343897104?style=flat&logo=discord&label=Discord&color=%237289da" alt="Discord"></a>
-<a href="https://github.com/mosharky"><img src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github" alt="GitHub"></a>
+<a href="https://github.com/mosharky/MO2-VS-Mod-Updater"><img src="https://img.shields.io/badge/GitHub-gray?style=flat&logo=github" alt="GitHub"></a>
 
 </center>
 
