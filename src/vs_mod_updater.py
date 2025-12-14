@@ -130,7 +130,8 @@ class PluginWindow(QtWidgets.QDialog):
                 filename = latest_release["filename"]
                 download_url = latest_release["mainfile"]
                 mod_name = update_data["name"]
-
+                download_url = download_url.replace(" ", "%20")
+                
                 try:
                     old_zip_path = self.mods_data[mod_id]["path"]
 
