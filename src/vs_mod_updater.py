@@ -514,7 +514,7 @@ class VSModUpdaterPlugin(mobase.IPluginTool):
         return "Update mods in MO2's virtual file system"
 
     def version(self) -> mobase.VersionInfo:
-        return mobase.VersionInfo(1, 0, 1)
+        return mobase.VersionInfo(1, 0, 2)
 
     def settings(self) -> List[mobase.PluginSetting]:
         return [mobase.PluginSetting("enabled", "Enable this plugin", True)]
