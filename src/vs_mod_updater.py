@@ -358,7 +358,7 @@ class PluginWindow(QtWidgets.QDialog):
         try:
             with urllib.request.urlopen(f"{self.base_url}/gameversions") as response:
                 if response.status == 200:
-                    data = json.loads(response.read().decode("utf-8"))
+                    data = json.loads(response.read().decode("utf-8-sig"))
                     # ASSUMPTION: The last entry in the list is always the latest version
                     return data["gameversions"][-1]["name"]
                 else:
@@ -378,7 +378,7 @@ class PluginWindow(QtWidgets.QDialog):
                     # Read and parse the JSON file
                     with zip_ref.open("modinfo.json") as json_file:
                         # Use fix_json_string to ensure the JSON is valid
-                        json_str = json_file.read().decode("utf-8")
+                        json_str = json_file.read().decode("utf-8-sig")
                         json_str = fix_json_string(json_str)
 
                         mod_info = json.loads(json_str)
@@ -410,7 +410,7 @@ class PluginWindow(QtWidgets.QDialog):
         try:
             with urllib.request.urlopen(f"{self.base_url}/mod/{mod_id}") as response:
                 if response.status == 200:
-                    data = json.loads(response.read().decode("utf-8"))
+                    data = json.loads(response.read().decode("utf-8-sig"))
                 else:
                     logging.critical(f"Error: HTTP {response.status}")
         except Exception as ex:
